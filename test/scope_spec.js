@@ -1037,4 +1037,46 @@ describe('Scope Inheritance', function(){
     child.$digest();
     expect(child.aValueWas).toBe('abc');
   });
+
+  it('digests from root on $apply', function() {
+    var parent = new Scope();
+    var child = parent.$new();
+    var child2 = child.$new();
+
+    parent.aValue = 'abc';
+    parent.counter = 0;
+    parent.$watch(
+      function(scope) { return scope.aValue; },
+      function(newValue, oldValue, scope) {
+        scope.counter++;
+      },
+      true
+    );
+
+    child2.$apply(function(scope) {  });
+    expect(parent.counter).toBe(1);
+  });
+
+  it('schedules a digest from root on $evalAsync', function() {
+    var parent = new Scope();
+    var child = parent.$new();
+    var child2 = child.$new();
+
+    parent.aValue = 'abc';
+    parent.counter = 0;
+    parent.$watch(
+      function(scope) { return scope.aValue; },
+      function(newValue, oldValue, scope) {
+        scope.counter++;
+      },
+      true
+    );
+
+    child2.$evalAsync(function(scope) {  });
+    setTimeout(function() {
+      expect(parent.counter).toBe(1);
+      done();
+    }, 50);
+  });
+
 });
