@@ -897,7 +897,7 @@ describe('Scope Inheritance', function(){
     var child = parent.$new();
     child.aValue = [1, 2, 3];
 
-    expect(parent.aValue).toBeUndefined;
+    expect(parent.aValue).toBeUndefined();
   });
 
   it('inherits the parents properties whenever they are defined', function() {
@@ -963,5 +963,29 @@ describe('Scope Inheritance', function(){
     expect(abb.anotherValue).toBe(2);
     expect(aa.anotherValue).toBeUndefined();
     expect(aaa.anotherValue).toBeUndefined();
+  });
+
+  it('shadows a parents property with the same name', function() {
+
+    var parent = new Scope();
+    var child = parent.$new();
+
+    parent.name = 'Joe';
+    child.name = 'Jill';
+
+    expect(child.name).toBe('Jill');
+    expect(parent.name).toBe('Joe');
+  });
+
+  it('does not shadow members of parent scopes attributes', function() {
+
+    var parent = new Scope();
+    var child = parent.$new();
+
+    parent.user = { name: 'Joe' };
+    child.user.name = 'Jill';
+
+    expect(child.user.name).toBe('Jill');
+    expect(parent.user.name).toBe('Jill');
   });
 });
