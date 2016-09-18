@@ -1244,4 +1244,13 @@ describe('Scope Inheritance', function(){
     parent.$digest();
     expect(child.counter).toBe(2);
   });
+
+  describe('$watchCollection', function() {
+    var scope;
+
+    beforeEach(function() {
+      scope = new Scope();
+    });
+  });
+
 });
