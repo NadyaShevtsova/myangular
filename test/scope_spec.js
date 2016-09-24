@@ -1974,7 +1974,7 @@ describe('Scope Inheritance', function(){
     it('is received by listeners on current scope after being stopped', function() {
       var listener1 = function(event) {
         event.stopPropagation();
-      }
+      };
       var listener2 = jasmine.createSpy();
 
       scope.$on('someEvent', listener1);
