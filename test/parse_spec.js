@@ -48,4 +48,37 @@ describe('parse', function() {
     expect(function() { parse('42e-'); }).toThrow();
     expect(function() { parse('42e-a'); }).toThrow();
   });
+
+  it('can parse a string in single quates', function() {
+    var fn = parse("'abc'");
+    expect(fn()).toBe('abc');
+  });
+
+  it('can parse a string in double quates', function() {
+    var fn = parse('"abc"');
+    expect(fn()).toBe('abc');
+  });
+
+  it('will not parse a string with mismatching quates', function() {
+    expect(function() { parse('"abc\''); }).toThrow();
+  });
+
+  it('can parse a string with single quates inside', function() {
+    var fn = parse("'a\\\'b'");
+    expect(fn()).toBe('a\'b');
+  });
+
+  it('can parse a string with double quates inside', function() {
+    var fn = parse('"a\\\"b"');
+    expect(fn()).toBe('a\"b');
+  });
+
+  it('will parse a string with unicod escapes', function() {
+    var fn = parse('"\\u00A0"');
+    expect(fn()).toEqual('\u00A0');
+  });
+
+  it('will not parse a string with invalid unicod escapes', function() {
+    expect(function() { parse('"\\u00T0"'); }).toThrow();
+  });
 });
