@@ -169,6 +169,7 @@ AST.ObjectExpression = 'ObjectExpression';
 AST.Property = 'Property';
 AST.Identifier = 'Identifier';
 AST.ThisExpression = 'ThisExpression';
+AST.LocalExpression = 'LocalExpression';
 AST.MemberExpression = 'MemberExpression';
 
 AST.prototype.ast = function(text) {
@@ -272,7 +273,8 @@ AST.prototype.constants = {
   'null':  {type: AST.Literal, value: null},
   'true':  {type: AST.Literal, value: true},
   'false': {type: AST.Literal, value: false},
-  'this': {type: AST.ThisExpression}
+  'this': {type: AST.ThisExpression},
+  '$locals': {type: AST.LocalsExpression}
 };
 
 function ASTCompiler(astBuilder) {
@@ -284,7 +286,7 @@ ASTCompiler.prototype.compile = function(text) {
   this.state = {body: [], nextId: 0, vars: []};
   this.recurse(ast);
   /* jshint -W054*/
-  return new Function('s',
+  return new Function('s', 'l',
     (this.state.vars.length ?
       'var ' + this.state.vars.join(',') + ';' :
       ''
@@ -316,7 +318,10 @@ ASTCompiler.prototype.recurse = function(ast) {
   case AST.Identifier:
     intoId = this.nextId();
     var introId = this.nextId();
-    this.if_('s', this.assign(introId, this.nonComputedMember('s', ast.name)));
+    this.if_(this.getHasOwnProperty('l', ast.name),
+        this.assign(introId, this.nonComputedMember('l', ast.name)));
+    this.if_(this.not(this.getHasOwnProperty('l', ast.name)) + '&& s',
+        this.assign(introId, this.nonComputedMember('s', ast.name)));
     return introId;
   case AST.ThisExpression:
     return 's';
@@ -326,7 +331,17 @@ ASTCompiler.prototype.recurse = function(ast) {
     this.if_(left,
       this.assign(intoId, this.nonComputedMember(left, ast.property.name)));
     return intoId;
+  case AST.LocalsExpression:
+    return 'l';
   }
+};
+
+ASTCompiler.prototype.not = function(e) {
+  return '!(' + e  + ')';
+};
+
+ASTCompiler.prototype.getHasOwnProperty = function(object, property) {
+  return object + '&&(' + this.escape(property) + ' in ' + object + ')';
 };
 
 ASTCompiler.prototype.nonComputedMember = function(left, right) {
