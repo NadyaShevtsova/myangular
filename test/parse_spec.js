@@ -203,4 +203,25 @@ describe('parse', function() {
     locals = {aKey: 43};
     expect(fn(scope, locals)).toBe(43);
   });
+
+  it('parses a simple computed property accsess', function() {
+    var fn = parse('aKey["anotherKey"]');
+    expect(fn({aKey: {anotherKey: 42}})).toBe(42);
+  });
+
+  it('parses a computed numeric array accsess', function() {
+    var fn = parse('anArray[1]');
+    expect(fn({anArray: [1, 2, 3]})).toBe(2);
+  });
+
+  it('parses a computed accsess with another key as property', function() {
+    var fn = parse('lock[key]');
+    expect(fn({key: 'theKey', lock: {theKey: 42}})).toBe(42);
+  });
+
+  it('parses computed access with another access as property', function() {
+    var fn = parse('lock[keys["aKey"]]');
+    expect(fn({keys: {aKey: 'theKey'},  lock: {theKey: 42}})).toBe(42);
+  });
+
 });
